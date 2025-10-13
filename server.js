@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.static(".")); // Servir arquivos estáticos (index.html, script.js, etc.)
 
 // Ler o arquivo JSON
-app.get("/participantes", (req, res) => {
+app.get((req, res) => {
   try {
     const data = fs.readFileSync("./dados.json", "utf8");
     res.json(JSON.parse(data));
@@ -17,7 +17,7 @@ app.get("/participantes", (req, res) => {
 });
 
 // Salvar os dados atualizados
-app.post("/participantes", (req, res) => {
+app.post((req, res) => {
   try {
     fs.writeFileSync("./dados.json", JSON.stringify(req.body, null, 2));
     res.json({ message: "Dados salvos com sucesso!" });
