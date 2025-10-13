@@ -1,0 +1,175 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 30px;
+    width: 90%;
+    max-width: 1200px;
+}
+/*atualização*/
+
+/*.container {
+  display: flex;
+  flex-direction: column
+  height: 300px; Exemplo de altura para o contêiner
+}
+
+.item {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.unico {
+  flex: 1; /* Ocupa 1/3 do espaço 
+  background-color: lightblue;
+}
+
+.dois-blocos {
+  flex: 2; Ocupa 2/3 do espaço 
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: lightgreen;
+}
+
+.bloco-inferior {
+  width: 40%;  Ajuste a largura conforme necessário 
+  height: 80px;
+  background-color: lightcoral;
+  margin: 0 5px;  Adiciona espaçamento horizontal entre os blocos 
+}*/
+
+.form-container,
+.ranking-preview {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    /* Permite que os blocos se ajustem */
+    min-width: 300px;
+}
+
+h2,h3 {
+    color: #4CAF50;
+    border-bottom: 2px solid #eee;
+    padding: 10px;
+    margin-top: 0;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    /* Garante que o padding não aumente a largura total */
+}
+
+small {
+    display: block;
+    color: #666;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Estilo da Tabela do Ranking */
+#rankingTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+#rankingTable th,
+#rankingTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#rankingTable th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+footer {
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+    background-color: #333;
+    color: white;
+    margin-top: 20px;
+}
+
+/*atualização*/
+.destaque {
+    background-color: #fff3cd;
+    /* amarelo claro */
+    font-weight: bold;
+}
+
+table {
+    border-collapse: collapse;
+    width: 90%;
+    margin-top: 10px;
+    margin: 0 auto;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    font-size: 10px;
+}
+

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<!--
+executar o servidor node 
+--watch 'c:\xampp\htdocs\ponto\server.js'
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Pontuação e Ranking</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header>
+    <h1>Sistema de Pontuação Promoção 2025 </h1>
+    <h1>(CB->3ºSGT)</h1>
+    <p>Insira novos dados para atualizar o ranking.</p>
+    
+    <p>Dados extraidos do BCG141-31.07.25; </p>
+    <p>CBPM; Situação Funcional: Em Atividade; Ultima promoção: 24/12/2020</p>
+
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="item unico">
+        <section class="form-container">
+          <h2>Registrar Nova Pontuação</h2>
+          <form id="meritForm">
+            <div class="input-group">
+              <label for="num">Numero na PM:</label>
+              <input type="number" id="num" name="num" min="10000" required placeholder="Nº: 25000">
+            </div>
+
+            <div class="input-group">
+              <label for="pontos">Pontuação:</label>
+              <input type="number" id="pontos" name="pontos" min="1" required placeholder="Ex: 50">
+              <small>Insira a pontuação por mérito que será atualizada ao participante.</small>
+            </div>
+
+            <button type="submit" id="submitBtn">Adicionar Pontuação</button>
+
+          </form>
+          <p>Total de <span id="totalParticipantes">0</span> Participantes</p>
+        </section>
+
+        <section class="bloco-inferior ranking-preview">
+          <div class="item dois-blocos">
+
+            <button type="button" id="antiguidade">Antiguidade</button>
+            <button type="button" id="merecimento">Merecimento</button>
+            <div id="bloco-antiguidade">
+              <h3>Antiguidade - 30%</h3>
+              <table id="tabelaTop">
+                <thead>
+                  <tr>
+                    <th>Posição</th>
+                    <th>Nº</th>
+                    <th>Nome</th>
+                    <th>Pontuação Total</th>
+                  </tr>
+                </thead>
+                <tbody id="topBody"></tbody>
+              </table>
+            </div>
+
+
+          </div>
+
+          <div id="bloco-merecimento">
+            <h3>Merecimento - 30% "Em Destaque"</h3>
+            <table id="tabelaRestante">
+              <thead>
+                <tr>
+                  <th>Posição</th>
+                  <th>Nº</th>
+                  <th>Nome</th>
+                  <th>Pontuação Total</th>
+                </tr>
+              </thead>
+              <tbody id="restanteBody"></tbody>
+            </table>
+
+            
+          </div>
+
+        </section>
+      </div>
+    </div>
+
+
+
+    </div>
+  </main>
+
+  <footer hidden>
+    <p>&copy; 2025 Sistema de Ranking Personalizado</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
