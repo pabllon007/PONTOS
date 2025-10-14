@@ -9,7 +9,7 @@ app.use(express.static(".")); // Servir arquivos estáticos (index.html, script.
 // Ler o arquivo JSON
 app.get( (req, res) => {
   try {
-    const data = fs.readFileSync("./dados.json", "utf8");
+    const data = fs.readFileSync("https://pontos-amber.vercel.app/dados.json", "utf8");
     res.json(JSON.parse(data));
   } catch (erro) {
     res.status(500).json({ erro: "Erro ao ler dados.json" });
@@ -19,7 +19,7 @@ app.get( (req, res) => {
 // Salvar os dados atualizados
 app.post((req, res) => {
   try {
-    fs.writeFileSync("./dados.json", JSON.stringify(req.body, null, 2));
+    fs.writeFileSync("https://pontos-amber.vercel.app/dados.json", JSON.stringify(req.body, null, 2));
     res.json({ message: "Dados salvos com sucesso!" });
   } catch (erro) {
     res.status(500).json({ erro: "Erro ao salvar dados.json" });
