@@ -1,101 +1,10 @@
-/*let participantes = [];
 
-// 🔹 Ler o JSON do servidor
-async function carregarParticipantes() {
-    try {
-        const resposta = await fetch('/participantes');
-        participantes = await resposta.json();
-        renderRanking();
-    } catch (erro) {
-        console.error("Erro ao carregar participantes:", erro);
-    }
-}
-
-// 🔹 Salvar o JSON atualizado no servidor
-async function salvarParticipantes() {
-    alert("Salvando dados!")
-    try {
-        await fetch('/participantes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(participantes)
-        });
-    } catch (erro) {
-        console.error("Erro ao salvar participantes:", erro);
-    }
-}
-
-// 🔹 Exibir o ranking na tabela
-function renderRanking() {
-    participantes.sort((a, b) => b.pontuacao - a.pontuacao);
-    //participantes.sort((a, b) => a.num - b.num);
-    const rankingBody = document.getElementById('rankingBody');
-    rankingBody.innerHTML = '';
-
-    participantes.forEach((p, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${p.num}</td>
-            <td>${p.nome}</td>
-            <td>${p.pontuacao}</td>
-        `;
-        rankingBody.appendChild(row);
-    });
-
-    document.getElementById('totalParticipantes').textContent = participantes.length;
-}
-
-// 🔹 Manipular o envio do formulário
-async function handleFormSubmit(event) {
-    event.preventDefault();
-
-    const numInput = document.getElementById('num');
-    const nomeInput = document.getElementById('nome');
-    const pontosInput = document.getElementById('pontos');
-    const num = parseInt(numInput.value);
-    //const nome = nomeInput.value.trim();
-    const pontos = parseInt(pontosInput.value, 10);
-
-    if (num && pontos > 1) {
-        const participanteExistente = participantes.find(p => p.num == num);
-        const indice = participantes.findIndex(p => p.num == num);
-        //alert(`Index ${indice}`);
-        if (participanteExistente) {
-            participanteExistente.pontuacao = pontos;
-            //alert(`Pontuação de ${participanteExistente.nome} atualizada.`);
-            //alert(`Pontuação de ${pontos} adicionada para ${participanteExistente.nome}.`);
-            //if (indice > -1) {
-                // 2. Remover 1 elemento a partir do índice encontrado
-                //alert(`Pontuação de ${participanteExistente.nome} atualizada.`);
-                //participantes.splice(indice, 1);
-                //participantes.push({ num: 99999, nome: aaaaaaaaaaaaaa, pontuacao: 5555555 });
-            //}
-        } else {
-
-            //participantes.push({ nome, pontuacao: pontos });
-            alert(`Novo participante não listado (88) 99808-6108! - informe o erro!`);
-        }
-
-        //numInput.value = '';
-        //nomeInput.value = '';
-        //pontosInput.value = '';
-
-        renderRanking();
-        await salvarParticipantes();
-    } else {
-        alert('Por favor, preencha os campos corretamente.');
-    }
-}
-
-document.getElementById('meritForm').addEventListener('submit', handleFormSubmit);
-document.addEventListener('DOMContentLoaded', carregarParticipantes);*/
 let participantes = [];
 
 // 🔹 Ler o JSON do servidor
 async function carregarParticipantes() {
   try {
-    const resposta = await fetch('/participantes');
+    const resposta = await fetch('https://pontos-amber.vercel.app/dados.json');
     participantes = await resposta.json();
     renderRanking();
   } catch (erro) {
@@ -106,7 +15,7 @@ async function carregarParticipantes() {
 // 🔹 Salvar o JSON atualizado no servidor
 async function salvarParticipantes() {
   try {
-    await fetch('/participantes', {
+    await fetch('https://pontos-amber.vercel.app/dados.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(participantes)
