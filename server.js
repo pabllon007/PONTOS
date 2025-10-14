@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.static(".")); // Servir arquivos estáticos (index.html, script.js, etc.)
 
 // Ler o arquivo JSON
-app.get((req, res) => {
+app.get( (req, res) => {
   try {
     const data = fs.readFileSync("./dados.json", "utf8");
     res.json(JSON.parse(data));
