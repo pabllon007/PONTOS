@@ -1,104 +1,403 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<!--
-executar o servidor node 
---watch 'c:\xampp\htdocs\ponto\server.js'
--->
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Pontuação e Ranking</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado – Teoria da Pena</title>
+<style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --text:#172033; --muted:#667085;
+  --primary:#1d4ed8; --primary2:#2563eb; --ok:#15803d; --bad:#b91c1c;
+  --border:#d9e1ec;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+header{background:linear-gradient(135deg,#102a56,#1d4ed8);color:white;padding:42px 20px;text-align:center}
+header h1{margin:0 0 8px;font-size:clamp(28px,5vw,44px)}
+header p{margin:0;opacity:.9}
+.container{max-width:980px;margin:28px auto;padding:0 16px}
+.progress-wrap{position:sticky;top:0;z-index:5;background:rgba(244,247,251,.95);backdrop-filter:blur(8px);padding:12px 0}
+.progress{height:10px;background:#dbe4f2;border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:var(--primary2);transition:.3s}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin:18px 0;box-shadow:0 5px 18px rgba(15,23,42,.05)}
+.q-title{font-weight:800;font-size:19px;margin-bottom:14px}
+.options{display:grid;gap:10px}
+.option{border:1px solid var(--border);border-radius:12px;padding:13px 15px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:.2s}
+.option:hover{border-color:#8aa8e8;background:#f8fbff}
+.option input{margin-top:5px}
+.option.disabled{cursor:default}
+.feedback{display:none;margin-top:18px;padding:16px;border-radius:12px}
+.feedback.correct{display:block;background:#ecfdf3;border:1px solid #bbf7d0}
+.feedback.wrong{display:block;background:#fef2f2;border:1px solid #fecaca}
+.feedback strong{display:block;margin-bottom:6px}
+.explanation{margin-top:8px}
+button{border:0;border-radius:12px;padding:14px 20px;font-weight:800;font-size:16px;cursor:pointer}
+#finish{background:var(--primary);color:white;width:100%;margin:22px 0}
+#finish:disabled{opacity:.5;cursor:not-allowed}
+#restart{background:#e8eef8;color:#17315f;margin-top:14px}
+.result{display:none;text-align:center;background:white;border:1px solid var(--border);border-radius:18px;padding:30px;margin:24px 0}
+.score{font-size:52px;font-weight:900;color:var(--primary);margin:8px 0}
+.badge{display:inline-block;background:#eff6ff;color:#1d4ed8;padding:7px 12px;border-radius:99px;font-weight:800}
+footer{text-align:center;color:var(--muted);padding:30px 16px}
+.small{font-size:14px;color:var(--muted)}
+</style>
 </head>
-
 <body>
-  <header>
-    <h1>Sistema de Pontuação Promoção 2025 </h1>
-    <h1>(CB->3ºSGT)</h1>
-    <p>Insira novos dados para atualizar o ranking.</p>
-    
-    <p>Dados extraidos do BCG141-31.07.25; </p>
-    <p>CBPM; Situação Funcional: Em Atividade; Ultima promoção: 24/12/2020</p>
+<header>
+  <h1>Simulado – Teoria da Pena</h1>
+  <p>30 questões • Direito Penal • Regimes, PPL, PRD, multa e teorias da pena</p>
+</header>
 
-  </header>
+<div class="container">
+  <div class="progress-wrap">
+    <div class="small" id="progressText">0 de 30 respondidas</div>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
 
-  <main>
-    <div class="container">
-      <div class="item unico">
-        <section class="form-container">
-          <h2>Registrar Nova Pontuação</h2>
-          <form id="meritForm">
-            <div class="input-group">
-              <label for="num">Numero na PM:</label>
-              <input type="number" id="num" name="num" min="10000" required placeholder="Nº: 25000">
-            </div>
+  <div id="quiz"></div>
 
-            <div class="input-group">
-              <label for="pontos">Pontuação:</label>
-              <input type="number" id="pontos" name="pontos" min="1" required placeholder="Ex: 50">
-              <small>Insira a pontuação por mérito que será atualizada ao participante.</small>
-            </div>
+  <button id="finish" disabled>Finalizar prova e calcular nota</button>
 
-            <button type="submit" id="submitBtn">Adicionar Pontuação</button>
+  <div class="result" id="result">
+    <div class="badge">PROVA CONCLUÍDA</div>
+    <div class="score" id="score"></div>
+    <h2 id="message"></h2>
+    <p id="summary"></p>
+    <button id="restart">Refazer prova</button>
+  </div>
+</div>
 
-          </form>
-          <p>Total de <span id="totalParticipantes">0</span> Participantes</p>
-        </section>
+<footer>Simulado educativo • Confira sempre a legislação e a jurisprudência atualizadas.</footer>
 
-        <section class="bloco-inferior ranking-preview">
-          <div class="item dois-blocos">
+<script>
+const questions = [
+{
+ q:"1. Sobre os regimes de cumprimento da pena e o trabalho do preso, assinale a alternativa correta:",
+ options:[
+ "No regime fechado, o trabalho externo é obrigatório e realizado exclusivamente fora do estabelecimento prisional.",
+ "No regime fechado, o trabalho pode ser realizado no estabelecimento prisional, e o trabalho externo é admitido nas hipóteses legais.",
+ "No regime aberto, o condenado não pode exercer atividade profissional.",
+ "No regime semiaberto, o condenado é proibido de trabalhar fora do estabelecimento.",
+ "O trabalho do preso não precisa ser remunerado."
+ ],
+ answer:1,
+ exp:"No regime fechado, o trabalho é realizado em regra no interior do estabelecimento, admitindo-se trabalho externo nas hipóteses legais. No semiaberto também pode haver trabalho externo. O trabalho do preso deve ser remunerado."
+},
+{
+ q:"2. Sobre as teorias da pena, assinale a alternativa correta:",
+ options:[
+ "A teoria absoluta entende que a pena possui exclusivamente finalidade preventiva.",
+ "A prevenção geral negativa busca ressocializar diretamente o condenado.",
+ "A prevenção geral positiva está relacionada à reafirmação da validade das normas e da confiança social no Direito.",
+ "A prevenção especial negativa busca intimidar toda a sociedade.",
+ "A teoria mista rejeita qualquer finalidade preventiva da pena."
+ ],
+ answer:2,
+ exp:"A prevenção geral positiva está ligada à reafirmação da validade da norma e à confiança social no ordenamento. Geral diz respeito à sociedade; especial, ao condenado. A prevenção geral negativa busca intimidar a sociedade."
+},
+{
+ q:"3. Sobre o trabalho do condenado, assinale a alternativa correta:",
+ options:[
+ "O trabalho do preso é sempre gratuito.",
+ "O trabalho do preso não possui relação com a execução da pena.",
+ "O trabalho do preso deve ser remunerado e possui disciplina própria conforme o regime de cumprimento.",
+ "O condenado em regime semiaberto jamais poderá trabalhar fora do estabelecimento.",
+ "O condenado em regime aberto não pode exercer atividade profissional."
+ ],
+ answer:2,
+ exp:"O Código Penal estabelece que o trabalho do preso será sempre remunerado, garantindo-se também os benefícios da Previdência Social. Trabalho prisional previsto em lei não se confunde com pena de trabalhos forçados."
+},
+{
+ q:"4. Sobre a diferença entre reclusão e detenção, assinale a alternativa correta:",
+ options:[
+ "A detenção somente pode ser cumprida em regime fechado.",
+ "A reclusão somente pode ser cumprida em regime aberto.",
+ "A reclusão pode ser cumprida em regime fechado, semiaberto ou aberto; a detenção, em regra, em regime semiaberto ou aberto.",
+ "Não existe diferença jurídica entre reclusão e detenção.",
+ "A detenção sempre possui pena superior à reclusão."
+ ],
+ answer:2,
+ exp:"A reclusão admite os três regimes como possibilidade inicial, conforme a lei e a fixação judicial. A detenção, em regra, não tem regime fechado como regime inicial, embora possa haver transferência para regime mais rigoroso."
+},
+{
+ q:"5. Assinale a alternativa que apresenta corretamente a correspondência entre os regimes de cumprimento de pena, os estabelecimentos e as características do trabalho do condenado:",
+ options:[
+ "Regime fechado: estabelecimento de segurança máxima ou média, com trabalho em comum durante o período diurno dentro do estabelecimento, admitido trabalho externo em serviço ou obras públicas nas condições legais; regime semiaberto: colônia agrícola, industrial ou similar, com trabalho em comum durante o período diurno, admitido trabalho externo e frequência a cursos; regime aberto: Casa do Albergado ou estabelecimento adequado, baseado na autodisciplina e responsabilidade, com trabalho, estudo ou atividade autorizada fora do estabelecimento, sem vigilância direta.",
+ "Regime fechado: Casa do Albergado, com trabalho externo obrigatório; semiaberto: estabelecimento de segurança máxima, sem trabalho externo; aberto: colônia agrícola, industrial ou similar.",
+ "Regime fechado: colônia agrícola, com trabalho exclusivamente externo; semiaberto: Casa do Albergado, sem possibilidade de estudo; aberto: estabelecimento de segurança máxima.",
+ "Todos os regimes possuem o mesmo estabelecimento e as mesmas regras de trabalho.",
+ "No regime fechado o condenado jamais pode trabalhar; no semiaberto o trabalho externo é proibido; no aberto não pode exercer atividade profissional."
+ ],
+ answer:0,
+ exp:"A alternativa A reúne a correspondência completa: fechado → estabelecimento de segurança máxima ou média e trabalho predominantemente interno, com hipóteses legais de trabalho externo; semiaberto → colônia agrícola, industrial ou similar, com trabalho interno e possibilidade de externo e estudo; aberto → Casa do Albergado ou estabelecimento adequado, baseado na autodisciplina e responsabilidade, permitindo trabalho, estudo ou atividade autorizada fora do estabelecimento."
+},
+{
+ q:"6. Assinale a alternativa que apresenta corretamente espécies de penas restritivas de direitos:",
+ options:[
+ "Reclusão, detenção e multa.",
+ "Prestação pecuniária, perda de bens e valores, prestação de serviços à comunidade, interdição temporária de direitos e limitação de fim de semana.",
+ "Reclusão, prestação pecuniária e multa.",
+ "Detenção, prisão simples e prestação de serviços.",
+ "Apenas prestação pecuniária e prestação de serviços."
+ ],
+ answer:1,
+ exp:"As PRD previstas no art. 43 do Código Penal incluem prestação pecuniária, perda de bens e valores, prestação de serviços à comunidade ou entidades públicas, interdição temporária de direitos e limitação de fim de semana."
+},
+{
+ q:"7. Pedro foi condenado por crime doloso a 3 anos de reclusão. O crime não foi cometido com violência ou grave ameaça à pessoa. Ele não é reincidente em crime doloso e as circunstâncias judiciais são favoráveis. Nesse caso:",
+ options:[
+ "A substituição é necessariamente proibida.",
+ "A pena pode ser substituída por restritiva de direitos, desde que preenchidos os demais requisitos legais.",
+ "Toda pena inferior a 4 anos deve obrigatoriamente ser convertida em multa.",
+ "A substituição somente seria possível se a pena fosse inferior a 2 anos.",
+ "A substituição somente é possível para crimes culposos."
+ ],
+ answer:1,
+ exp:"O art. 44 do Código Penal prevê, entre outros requisitos, pena não superior a 4 anos para crime doloso, ausência de violência ou grave ameaça à pessoa, análise da reincidência e suficiência das circunstâncias judiciais."
+},
+{
+ q:"8. Sobre a pena de multa, assinale a alternativa correta:",
+ options:[
+ "A multa penal é uma indenização paga diretamente à vítima.",
+ "A multa penal pode ser convertida automaticamente em prisão caso o condenado não pague.",
+ "A multa penal possui natureza de sanção penal e sua execução segue as regras próprias da legislação e da jurisprudência.",
+ "A multa penal não pode, em nenhuma hipótese, ser objeto de desconto no vencimento ou salário.",
+ "A multa deixa de ser uma pena depois do trânsito em julgado."
+ ],
+ answer:2,
+ exp:"A multa é uma sanção penal e não se confunde com indenização à vítima. Seu inadimplemento não autoriza conversão automática em prisão. A execução da multa observa as regras legais e a jurisprudência."
+},
+{
+ q:"9. Em relação à substituição da pena privativa de liberdade por restritiva de direitos, assinale a alternativa correta:",
+ options:[
+ "Pena superior a 8 anos, ausência de reincidência e crime com violência.",
+ "Pena não superior a 4 anos, crime sem violência ou grave ameaça à pessoa, ausência de reincidência impeditiva e circunstâncias judiciais favoráveis.",
+ "Pena inferior a 10 anos e reincidência obrigatória.",
+ "Qualquer pena pode ser substituída, desde que o réu seja primário.",
+ "Basta que o condenado tenha bons antecedentes."
+ ],
+ answer:1,
+ exp:"Para crime doloso, o art. 44 do Código Penal exige, entre outros requisitos, pena não superior a 4 anos, ausência de violência ou grave ameaça à pessoa, análise da reincidência e circunstâncias judiciais que indiquem a suficiência da substituição."
+},
+{
+ q:"10. Carlos é reincidente e foi condenado a 3 anos e 6 meses de reclusão. As circunstâncias judiciais são favoráveis. Considerando a Súmula 269 do STJ, assinale a alternativa correta:",
+ options:[
+ "Carlos obrigatoriamente deverá iniciar no regime fechado.",
+ "Carlos poderá iniciar no regime aberto apenas porque sua pena é inferior a 4 anos.",
+ "É admissível a adoção do regime semiaberto, mesmo sendo Carlos reincidente, porque sua pena é igual ou inferior a 4 anos e as circunstâncias judiciais são favoráveis.",
+ "A reincidência não produz nenhuma consequência na fixação do regime.",
+ "Carlos deverá necessariamente cumprir toda a pena no regime semiaberto."
+ ],
+ answer:2,
+ exp:"A Súmula 269 do STJ admite o regime semiaberto para reincidentes condenados a pena igual ou inferior a 4 anos, quando favoráveis as circunstâncias judiciais. A súmula não significa concessão automática do semiaberto."
+},
+{
+ q:"11. Segundo o Código Penal, a pena privativa de liberdade compreende:",
+ options:["Reclusão e detenção.","Prestação pecuniária e multa.","Reclusão e multa.","Detenção e prestação de serviços.","Somente reclusão."],
+ answer:0,
+ exp:"As penas privativas de liberdade são reclusão e detenção. Multa e penas restritivas de direitos são espécies distintas."
+},
+{
+ q:"12. A respeito da pena de trabalhos forçados, assinale a alternativa correta:",
+ options:["É uma pena obrigatória no regime fechado.","É permitida para crimes hediondos.","É proibida pela Constituição Federal.","É uma espécie de PRD.","É obrigatória para reincidentes."],
+ answer:2,
+ exp:"A Constituição Federal, no art. 5º, XLVII, c, proíbe penas de trabalhos forçados. Isso não se confunde com o trabalho prisional previsto na legislação."
+},
+{
+ q:"13. A prestação de serviços à comunidade ou a entidades públicas é classificada como:",
+ options:["Pena privativa de liberdade.","Pena restritiva de direitos.","Medida de segurança.","Pena de multa.","Medida cautelar."],
+ answer:1,
+ exp:"A prestação de serviços à comunidade ou a entidades públicas é uma das espécies de pena restritiva de direitos previstas no art. 43 do Código Penal."
+},
+{
+ q:"14. A interdição temporária de direitos, segundo o Código Penal, é:",
+ options:["Uma pena privativa de liberdade.","Uma medida de segurança.","Uma espécie de pena restritiva de direitos.","Uma agravante genérica.","Uma causa de aumento de pena."],
+ answer:2,
+ exp:"A interdição temporária de direitos integra o rol das penas restritivas de direitos. Portanto, é incorreto dizer que ela não é PRD."
+},
+{
+ q:"15. Na primeira fase da dosimetria da pena, o juiz analisa principalmente:",
+ options:["As causas de aumento e diminuição.","As circunstâncias judiciais do art. 59 do Código Penal.","Somente as agravantes.","Somente as atenuantes.","Apenas a reincidência."],
+ answer:1,
+ exp:"Na primeira fase do sistema trifásico, o juiz fixa a pena-base considerando as circunstâncias judiciais do art. 59 do Código Penal."
+},
+{
+ q:"16. No sistema trifásico de aplicação da pena, a segunda fase corresponde:",
+ options:["À fixação da pena-base.","À análise das agravantes e atenuantes.","À análise das causas de aumento e diminuição.","À escolha do estabelecimento prisional.","À execução da multa."],
+ answer:1,
+ exp:"A segunda fase da dosimetria considera as circunstâncias agravantes e atenuantes. A terceira fase trata das causas de aumento e diminuição."
+},
+{
+ q:"17. No sistema trifásico, as causas de aumento e de diminuição da pena são analisadas:",
+ options:["Na primeira fase.","Na segunda fase.","Na terceira fase.","Somente depois da execução.","Antes da denúncia."],
+ answer:2,
+ exp:"Na terceira fase da dosimetria são aplicadas as causas de aumento e de diminuição previstas na Parte Geral ou Especial do Código Penal e em legislação penal especial."
+},
+{
+ q:"18. A teoria absoluta ou retributiva da pena entende, em síntese, que:",
+ options:["A pena tem como finalidade principal retribuir o mal causado pelo crime.","A pena serve apenas para intimidar a sociedade.","A pena busca somente ressocializar o condenado.","A pena não possui qualquer relação com o crime praticado.","A pena é exclusivamente uma medida administrativa."],
+ answer:0,
+ exp:"A teoria absoluta ou retributiva vê a pena como resposta/retribuição ao delito praticado. Ela se diferencia das teorias preventivas, que enfatizam a prevenção de novos crimes."
+},
+{
+ q:"19. A prevenção geral negativa está relacionada principalmente:",
+ options:["À ressocialização individual do condenado.","À intimidação da sociedade para evitar a prática de crimes.","À reafirmação da validade da norma perante a sociedade.","À substituição da pena por medida educativa.","À reparação civil do dano."],
+ answer:1,
+ exp:"A prevenção geral negativa dirige-se à coletividade e busca produzir efeito de intimidação ou dissuasão para evitar novos delitos."
+},
+{
+ q:"20. A prevenção geral positiva está relacionada principalmente:",
+ options:["À segregação física do condenado.","À reafirmação da validade da norma e da confiança social no Direito.","À cobrança da multa penal.","À prestação pecuniária.","À liberdade condicional."],
+ answer:1,
+ exp:"A prevenção geral positiva é explicada como reforço da confiança social na norma e reafirmação de sua validade."
+},
+{
+ q:"21. A prevenção especial positiva está relacionada:",
+ options:["À ressocialização e reintegração do condenado.","À intimidação de toda a sociedade.","À retribuição pura do crime.","À cobrança da multa.","À escolha do regime fechado."],
+ answer:0,
+ exp:"A prevenção especial positiva volta-se ao condenado e está associada à ressocialização e reintegração social."
+},
+{
+ q:"22. A prevenção especial negativa busca principalmente:",
+ options:["Reafirmar a norma perante toda a sociedade.","Evitar que o condenado volte a delinquir, inclusive por sua retirada do convívio social quando cabível.","Indenizar a vítima.","Aumentar a multa.","Substituir toda PPL por PRD."],
+ answer:1,
+ exp:"A prevenção especial negativa dirige-se ao condenado e busca impedir ou reduzir a prática de novos crimes, inclusive mediante incapacitação ou segregação quando juridicamente cabível."
+},
+{
+ q:"23. A teoria mista ou unificadora da pena:",
+ options:["Aceita somente a retribuição.","Aceita somente a prevenção geral negativa.","Combina elementos retributivos e preventivos da pena.","Rejeita qualquer finalidade da pena.","Considera a multa uma indenização civil."],
+ answer:2,
+ exp:"A teoria mista ou unificadora procura reunir elementos das teorias retributiva e preventiva, reconhecendo múltiplas funções da pena."
+},
+{
+ q:"24. Para crime doloso, em regra, a substituição da PPL por PRD exige pena aplicada:",
+ options:["Superior a 8 anos.","Não superior a 4 anos, além dos demais requisitos legais.","Sempre inferior a 1 ano.","Sempre inferior a 2 anos.","De qualquer duração, desde que o réu seja primário."],
+ answer:1,
+ exp:"O art. 44, I, do Código Penal prevê, para crime doloso, pena privativa de liberdade não superior a 4 anos, desde que os demais requisitos também estejam presentes."
+},
+{
+ q:"25. Para a substituição prevista no art. 44 do Código Penal, o crime doloso, em regra, não pode ter sido cometido:",
+ options:["Sem dolo.","Com violência ou grave ameaça à pessoa.","Durante o dia.","Por agente primário.","Contra patrimônio público."],
+ answer:1,
+ exp:"Um dos requisitos legais é que o crime doloso não tenha sido cometido com violência ou grave ameaça à pessoa, observadas as demais regras legais."
+},
+{
+ q:"26. A reincidência em crime doloso:",
+ options:["Nunca interfere na substituição por PRD.","Pode impedir a substituição, observadas as regras e ressalvas do art. 44 do Código Penal.","Sempre obriga o regime fechado.","Sempre transforma a pena em multa.","É irrelevante para qualquer decisão sobre pena."],
+ answer:1,
+ exp:"A reincidência em crime doloso é relevante para a substituição, mas o art. 44 possui regras e ressalvas específicas. Não se deve tratar a reincidência como impedimento absoluto em todas as situações."
+},
+{
+ q:"27. As circunstâncias judiciais do art. 59 são relevantes para:",
+ options:["Somente a cobrança da multa.","A fixação da pena-base e também para decisões relacionadas ao regime e à suficiência da substituição, conforme a lei.","Somente a escolha da vítima.","Somente a denúncia.","Apenas a prescrição."],
+ answer:1,
+ exp:"As circunstâncias judiciais do art. 59 têm papel central na dosimetria e também são consideradas na fixação do regime e na análise da suficiência da substituição, conforme os dispositivos aplicáveis."
+},
+{
+ q:"28. Segundo a Súmula 269 do STJ, é admissível o regime semiaberto para reincidente condenado a pena:",
+ options:["Superior a 8 anos, independentemente das circunstâncias.","Igual ou inferior a 4 anos, se favoráveis as circunstâncias judiciais.","De qualquer duração, mesmo com circunstâncias desfavoráveis.","Somente de detenção.","Somente se o crime for culposo."],
+ answer:1,
+ exp:"A Súmula 269 do STJ estabelece que é admissível o regime semiaberto para reincidentes condenados a pena igual ou inferior a 4 anos, se favoráveis as circunstâncias judiciais."
+},
+{
+ q:"29. Sobre os estabelecimentos correspondentes aos regimes, assinale a alternativa correta:",
+ options:[
+ "Fechado → Casa do Albergado; semiaberto → segurança máxima; aberto → colônia agrícola.",
+ "Fechado → estabelecimento de segurança máxima ou média; semiaberto → colônia agrícola, industrial ou similar; aberto → Casa do Albergado ou estabelecimento adequado.",
+ "Fechado → colônia agrícola; semiaberto → Casa do Albergado; aberto → segurança máxima.",
+ "Todos os regimes utilizam necessariamente a mesma unidade prisional.",
+ "Aberto → estabelecimento de segurança máxima; fechado → Casa do Albergado."
+ ],
+ answer:1,
+ exp:"A correspondência legal é: fechado → estabelecimento de segurança máxima ou média; semiaberto → colônia agrícola, industrial ou similar; aberto → Casa do Albergado ou estabelecimento adequado."
+},
+{
+ q:"30. Sobre reclusão e detenção, assinale a alternativa correta:",
+ options:[
+ "A detenção possui regime inicial fechado como regra.",
+ "A reclusão somente pode começar no regime fechado.",
+ "A reclusão pode ter início nos regimes fechado, semiaberto ou aberto; a detenção, em regra, nos regimes semiaberto ou aberto.",
+ "Reclusão e detenção são espécies de PRD.",
+ "Não há qualquer diferença legal entre elas."
+ ],
+ answer:2,
+ exp:"A diferença está expressamente prevista no art. 33 do Código Penal: reclusão admite os três regimes como possibilidades iniciais; detenção, em regra, semiaberto ou aberto."
+}
+];
 
-            <button type="button" id="antiguidade">Antiguidade</button>
-            <button type="button" id="merecimento">Merecimento</button>
-            <div id="bloco-antiguidade">
-              <h3>Antiguidade - 30%</h3>
-              <table id="tabelaTop">
-                <thead>
-                  <tr>
-                    <th>Posição</th>
-                    <th>Nº</th>
-                    <th>Nome</th>
-                    <th>Pontuação Total</th>
-                  </tr>
-                </thead>
-                <tbody id="topBody"></tbody>
-              </table>
-            </div>
+const quiz = document.getElementById("quiz");
+const finish = document.getElementById("finish");
+const result = document.getElementById("result");
+let answered = 0, score = 0;
 
-
-          </div>
-
-          <div id="bloco-merecimento">
-            <h3>Merecimento - 30% "Em Destaque"</h3>
-            <table id="tabelaRestante">
-              <thead>
-                <tr>
-                  <th>Posição</th>
-                  <th>Nº</th>
-                  <th>Nome</th>
-                  <th>Pontuação Total</th>
-                </tr>
-              </thead>
-              <tbody id="restanteBody"></tbody>
-            </table>
-
-            
-          </div>
-
-        </section>
+function render(){
+  quiz.innerHTML = "";
+  questions.forEach((item,i)=>{
+    const card=document.createElement("section");
+    card.className="card";
+    card.innerHTML=`<div class="q-title">${item.q}</div>
+      <div class="options">
+      ${item.options.map((op,j)=>`
+        <label class="option" data-q="${i}" data-a="${j}">
+          <input type="radio" name="q${i}" value="${j}">
+          <span><strong>${String.fromCharCode(65+j)})</strong> ${op}</span>
+        </label>`).join("")}
       </div>
-    </div>
+      <div class="feedback" id="fb${i}"></div>`;
+    quiz.appendChild(card);
+  });
 
+  document.querySelectorAll(".option").forEach(el=>{
+    el.addEventListener("click",()=>answer(Number(el.dataset.q),Number(el.dataset.a)));
+  });
+}
 
+function answer(i,a){
+  const inputs=document.querySelectorAll(`input[name="q${i}"]`);
+  if([...inputs].some(x=>x.disabled)) return;
+  inputs.forEach(x=>x.disabled=true);
+  const labels=document.querySelectorAll(`[data-q="${i}"]`);
+  labels.forEach(x=>x.classList.add("disabled"));
+  const correct=questions[i].answer;
+  const fb=document.getElementById("fb"+i);
+  if(a===correct){
+    score++;
+    fb.className="feedback correct";
+    fb.innerHTML=`<strong>✅ Resposta correta!</strong>${questions[i].exp}`;
+  }else{
+    fb.className="feedback wrong";
+    fb.innerHTML=`<strong>❌ Resposta incorreta.</strong><div>Resposta correta: <strong>${String.fromCharCode(65+correct)}) ${questions[i].options[correct]}</strong></div><div class="explanation">${questions[i].exp}</div>`;
+  }
+  answered++;
+  updateProgress();
+}
 
-    </div>
-  </main>
+function updateProgress(){
+  document.getElementById("progressText").textContent=`${answered} de ${questions.length} respondidas`;
+  document.getElementById("progressBar").style.width=(answered/questions.length*100)+"%";
+  finish.disabled=answered!==questions.length;
+}
 
-  <footer hidden>
-    <p>&copy; 2025 Sistema de Ranking Personalizado</p>
-  </footer>
+finish.addEventListener("click",()=>{
+  const nota=(score/questions.length*10).toFixed(1);
+  document.getElementById("score").textContent=`${nota}/10`;
+  let msg;
+  if(score===10) msg="🏆 Excelente! Você gabaritou a prova!";
+  else if(score>=8) msg="🎉 Parabéns! Ótimo desempenho!";
+  else if(score>=6) msg="👏 Parabéns! Você concluiu a prova e teve um bom desempenho!";
+  else msg="📚 Parabéns por concluir a prova! Revise os pontos indicados nas explicações e tente novamente.";
+  document.getElementById("message").textContent=msg;
+  document.getElementById("summary").textContent=`Você acertou ${score} de ${questions.length} questões. Sua nota foi ${nota}/10.`;
+  result.style.display="block";
+  result.scrollIntoView({behavior:"smooth"});
+});
 
-  <script src="script.js"></script>
+document.getElementById("restart").addEventListener("click",()=>{
+  answered=0; score=0; result.style.display="none"; render(); updateProgress(); window.scrollTo({top:0,behavior:"smooth"});
+});
+
+render();
+updateProgress();
+</script>
 </body>
-
 </html>
